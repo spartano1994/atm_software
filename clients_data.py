@@ -5,6 +5,7 @@ import pytz
 import time
 import numpy as np
 
+
 def validate_database() :
     """Esta función importa los datos de un csv con los datos de los clientes en caso de existir un csv, lo crea
      en caso de no existir y nos devuelve la ruta"""
@@ -62,6 +63,7 @@ def validate_client_data( card_number ) :
     # Construimos una columna con los números de tarjeta en un array de numpy
     card_number_modified = card_number[0: 4] + "-" + card_number[4: 8] + "-" + card_number[8: 12] + "-" + card_number[12: 16]
 
+    # Verificamos que el número de tarjeta esté e la columna de números card_number_data
     if card_number_modified in card_number_data :
         # Encontramos los datos correspondientes al número de tarjeta y solo nos quedamos con ciertos datos
         find = np.where( database[ "card_number" ] == card_number_modified )
@@ -78,6 +80,7 @@ def validate_client_data( card_number ) :
 
         return "valid_card", client_data, index
 
+    # Si no está simplemente pedimos que remueva la tarjeta
     else:
         print( "Tarjeta inválida" )
         print( "Remueva su tarjeta e intente de nuevo" )
@@ -87,18 +90,18 @@ def validate_client_data( card_number ) :
         os.system( "cls" )
 
         return "invalid_card", np.NaN, np.NaN
+    
 
 def validate_password( client_data ) :
     """Esta función le pide la contraseña al usuario, si se equivoca después de 5 intentos, la tarjeta
         quedará bloqueada (card_status=0)"""
 
-    # El usuario tiene 5 intentos para colocar correctamente su contraseña, si falla 5 veces su
-    #tarjeta queda bloqeada
+    # El usuario tiene 5 intentos para colocar correctamente su contraseña
     attemps = 5
 
     while True:
         # Pedimos al usuario que ingrese su contraseña
-        password = input( "Ingrese su contraseña o presione enter para salir: " )
+        password = input( "Ingrese su contraseña o presione enter para salir:\n " )
 
         # Si el password es correcto salimos de esta función para pasar al menu d usuario
         if password == client_data[ "password" ] :
@@ -111,6 +114,7 @@ def validate_password( client_data ) :
         print( "Contraseña incorrecta. Intente de nuevo." )
         attemps -= 1
 
+        # si falla 5 veces, su tarjeta queda bloqeada
         if attemps == 0 :
             print( "Su tarjeta ha sido bloqueada. Ha colocado incorrectamente su contraseña 5 vcces." )
             print( "Consulte a su banco" )
@@ -121,3 +125,70 @@ def validate_password( client_data ) :
 
         time.sleep( 3 )
         os.system( "cls" )
+
+
+def balance_inquiry( client_data , index ) :
+    """Esta función muestra el saldo total del usuario y su saldo ese día"""
+    os.system( "cls" )
+
+    # Se importa el csv con los clientes
+    ruta_csv = os.getcwd()
+    ruta_csv += "\clientsdata.csv"
+    database = pd.read_csv( ruta_csv )
+
+    # Se imprime el saldo disponible para ese día y el saldo total de la cuenta
+    print( "Saldo total = :" , database.loc[ index , "total_balance"  ] )
+    print( "Saldo disponible = :" , database.loc[ index , "day_balance" ] )
+
+    input( "Presione enter para coninuar" )
+
+
+def cash_withdrawal( client_data , index ) :
+    os.system( "cls" )
+
+    # Se importa el csv con los clientes
+    ruta_csv = os.getcwd()
+    ruta_csv += "\clientsdata.csv"
+    database = pd.read_csv( ruta_csv )
+
+    # Se pide la cantidad a retirar y se verifica que sea menor o igual a la cantidad disponible ese día
+    while True :
+        cash = int( input( "Ingrese la cantidad que desea retirar :\n" ) )
+
+        if cash < database.loc[ index , "day_balance" ] :
+            break
+        else :
+            os.system( "cls" )
+            print( "Esa cantidad no está disponible. Intente de nuevo" )
+
+
+def wire_transfer( client_data , index ) :
+    os.system( "cls" )
+
+    # Se importa el csv con los clientes
+    ruta_csv = os.getcwd()
+    ruta_csv += "\clientsdata.csv"
+    database = pd.read_csv( ruta_csv )
+
+    # Se pide la cantidad a retirar y se verifica que sea menor o igual a la cantidad disponible ese día
+    while True :
+        cash = int( input( "Ingrese la cantidad que desea retirar :\n" ) )
+
+        if cash < database.loc[ index , "day_balance" ] :
+            break
+        else :
+            os.system( "cls" )
+            print( "Esa cantidad no está disponible. Intente de nuevo" ))
+
+    
+
+def validate_option( option , client_data , index ) :
+        if option == "1" :
+            balance_inquiry( client_data , index )
+        elif option == "2" :
+            cash_withdrawal( client_data , index )
+        elif option == "3" :
+            wire_transfer( client_data , index )
+        else:
+            pass
+        

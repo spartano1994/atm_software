@@ -3,8 +3,6 @@ from clients_data import *
 
 def principal() :
     while True:
-        print( "Bienvenido a Mexabank." )
-
         # Verificamos que se trate de un numero de tarjeta bien escrito
         card_number = validate_card_number()
 
@@ -25,6 +23,7 @@ def principal() :
         # Si la tarjeta no ha sido bloqueada, preguntamos por la contraseña
         status_pass = validate_password( client_data )
 
+        # Si falla 5 veces la contraseña, la tarjeta se bloquee. Si se desea salir antes de bloquear la tarjeta, simplemente se sale
         if status_pass == "locked_card" :
             del client_data
             continue
@@ -33,7 +32,9 @@ def principal() :
             bye()
             continue
 
-        principal_menu()
+        # Si todos los datos son correctos, se despliega el menu de usuario
+        option = user_menu()
+        validate_option( option , client_data = client_data , index = index )
 
         bye()
 
