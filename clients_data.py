@@ -29,7 +29,7 @@ def validate_database() :
                            "card_number"  : [ "0000-0000-0000-0001" , "0000-0000-0000-0002" , "0000-0000-0000-0003"  ] ,
                            "complete_name" : [ "Juan Pérez Pérez" , "Leonardo Gabriel Díaz Feliciano" , "José Antonio García Gómez" ] ,
                            "password" : [ "password1" , "password2" , "password3" ]  ,
-                           "card_state" : [ 1 , 1 , 1 ] ,
+                           "card_state" : [ 1 , 1 , 0 ] ,
                            "total_balance" : [ 100000 , 100000 , 100000 ] ,
                            "day_balance" : [ 9100 , 9100 , 9100 ] ,
                            "last_consultation" : [ today , today , today ] }
@@ -70,7 +70,7 @@ def validate_client_data( card_number ) :
 
         # Verificamos que la tarjeta no esté bloqueada( 0 )
         if client_data[ "card_state" ] == 0:
-            print("Su tarjeta ha sido bloqueada\nConsulte a su banco")
+            print("Su tarjeta se encuentra bloqueada\nConsulte a su banco")
 
             time.sleep( 5 )
             os.system( "cls" )
@@ -82,8 +82,42 @@ def validate_client_data( card_number ) :
         print( "Tarjeta inválida" )
         print( "Remueva su tarjeta e intente de nuevo" )
 
-        del data
+        del database
         time.sleep( 5 )
         os.system( "cls" )
 
         return "invalid_card", np.NaN, np.NaN
+
+def validate_password( client_data ) :
+    """Esta función le pide la contraseña al usuario, si se equivoca después de 5 intentos, la tarjeta
+        quedará bloqueada (card_status=0)"""
+
+    # El usuario tiene 5 intentos para colocar correctamente su contraseña, si falla 5 veces su
+    #tarjeta queda bloqeada
+    attemps = 5
+
+    while True:
+        # Pedimos al usuario que ingrese su contraseña
+        password = input( "Ingrese su contraseña o presione enter para salir: " )
+
+        # Si el password es correcto salimos de esta función para pasar al menu d usuario
+        if password == client_data[ "password" ] :
+            return "valid_pass"
+
+        if len( password ) == 0 :
+            return "exit_option"
+
+        # Si la contraseña no es correcta, le informamos al usuario y le quitamos uno de los intentos
+        print( "Contraseña incorrecta. Intente de nuevo." )
+        attemps -= 1
+
+        if attemps == 0 :
+            print( "Su tarjeta ha sido bloqueada. Ha colocado incorrectamente su contraseña 5 vcces." )
+            print( "Consulte a su banco" )
+
+            time.sleep( 5 )
+            os.system( "cls" )
+            return "locked_card"
+
+        time.sleep( 3 )
+        os.system( "cls" )
