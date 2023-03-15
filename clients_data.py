@@ -6,6 +6,7 @@ import time
 import numpy as np
 
 
+
 def validate_database() :
     """Esta función importa los datos de un csv con los datos de los clientes en caso de existir un csv, lo crea
      en caso de no existir y nos devuelve la ruta"""
@@ -144,6 +145,8 @@ def balance_inquiry( client_data , index ) :
 
 
 def cash_withdrawal( client_data , index ) :
+    """Esta función efectúa los retiros de la cuenta una vez validada"""
+
     os.system( "cls" )
 
     # Se importa el csv con los clientes
@@ -159,7 +162,41 @@ def cash_withdrawal( client_data , index ) :
             break
         else :
             os.system( "cls" )
-            print( "Esa cantidad no está disponible. Intente de nuevo" )
+            print( "Esa cantidad no está disponible en este momento. Intente de nuevo" )
+
+    # Se verifica que la cantidad a retirar esté disponible
+    while True:
+        if cash <= database.loc[ index , "total_balance" ]:
+
+            # Se extraen los aldos totales y del día
+            day_balance = float( database.loc[ index , "day_balance" ] )
+            total_balance = float( database.loc[ index , "total_balance" ] )
+
+            # Se resta la cantidad a retirar del saldo total y del día
+            remaining_total = total_balance - float( cash )
+            remaining_day = day_balance - float( cash )
+
+            # Se reescriben los nuevos saldos totales y del día
+            database.loc[ index , "day_balance" ] = remaining_day
+            database.loc[ index , "total_balance" ] = remaining_total
+
+            # Se guarda nuevamente el csv, el parámetro index se coloca porque, en caso de no hacerlo
+            # escribe una columna nueva cada vez que se retire saldo
+            database.to_csv( ruta_csv , index = False )
+            
+            # Se muestra por pantalla los saldos de la cuenta
+            os.system( "cls" )
+            print( "Su saldo es:" , remaining_total )
+            print( "Su saldo disponible es:" , remaining_day )
+            time.sleep( 6 )
+            os.system( "cls" )
+            break
+        else:
+            # Se anuncai que el saldo es insuficiente y se regresa a preguntar la cantidad a retirar
+            print( "Saldo insuficiente" )
+            print( "Intente de nuevo" )
+            time.sleep( 4 )
+            os.system( "cls" )
 
 
 def wire_transfer( client_data , index ) :
@@ -178,9 +215,8 @@ def wire_transfer( client_data , index ) :
             break
         else :
             os.system( "cls" )
-            print( "Esa cantidad no está disponible. Intente de nuevo" ))
+            print( "Esa cantidad no está disponible. Intente de nuevo" )
 
-    
 
 def validate_option( option , client_data , index ) :
         if option == "1" :

@@ -55,6 +55,8 @@ def user_menu() :
 
 def bye() :
     """Esta función despide al usuario antes de dinalizar su sesión"""
+
+    os.system( "cls" )
     print("Fue un placer atenderte")
     time.sleep( 3 )
     os.system("cls")
