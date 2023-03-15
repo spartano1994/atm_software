@@ -21,7 +21,7 @@ def principal() :
             continue
 
         # Si la tarjeta no ha sido bloqueada, preguntamos por la contraseña
-        status_pass = validate_password( client_data )
+        status_pass = validate_password( client_data , index )
 
         # Si falla 5 veces la contraseña, la tarjeta se bloquee. Si se desea salir antes de bloquear la tarjeta, simplemente se sale
         if status_pass == "locked_card" :
@@ -38,7 +38,7 @@ def principal() :
 
         bye()
 
-        break
+        continue
 
 
 if __name__ == "__main__" :

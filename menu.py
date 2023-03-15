@@ -13,7 +13,7 @@ def validate_card_number( ):
 
     while validate == None:
         os.system( "cls" )
-        print( "*****Bienvenido a Mexabank.*****" )
+        print( "*****Bienvenido a Mexabank.*****\n" )
 
         # Pedimos al usuario que inserte su tarjeta
         card_number = input( "Inserte su tarjeta: " )
@@ -21,12 +21,13 @@ def validate_card_number( ):
         # Establecemos que deba ser únicamente 16 dígitos
         patron = r"\d{16}"
 
-        # Matcheamos la contraseña ingresada y el patrón de los 16 dígitos
+        # Matcheamos el número de tarjeta ingresado y el patrón de los 16 dígitos
         validate = re.fullmatch( patron , card_number )
 
         # Si no concidieron, habrá que intentar de nuevo
         if validate == None :
-            print( "Intente de nuevo" )
+            os.system( "cls" )
+            print( "Tarjeta inváida. Intente de nuevo" )
             time.sleep( 3 )
         
         # Si coinciden, se sale de la función devolviendo el número de tarjeta
@@ -41,12 +42,11 @@ def user_menu() :
         print( """Teclea la opción que deseas realizar
             1.- Consulta de saldo
             2.- Retiro de efectivo
-            3.- Transferenca bancaria
-            4.- Salir""")
+            3.- Salir""")
 
         option = input()
 
-        if option in [ "1" , "2" , "3" , "4" ] :
+        if option in [ "1" , "2" , "3" ] :
             return option
         else:
             print( "opción inválida. Intente de nuevo" )

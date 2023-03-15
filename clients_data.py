@@ -4,6 +4,7 @@ import datetime as dt
 import pytz
 import time
 import numpy as np
+import re
 
 def date_modified( date ):
     """Esta función le da un formato establecido a las fechas"""
@@ -55,7 +56,7 @@ def validate_database() :
         client_columns = { "client_number" : [ "000001" , "000002" , "000003" ] ,
                            "card_number"  : [ "0000-0000-0000-0001" , "0000-0000-0000-0002" , "0000-0000-0000-0003"  ] ,
                            "complete_name" : [ "Juan Pérez Pérez" , "Leonardo Gabriel Díaz Feliciano" , "José Antonio García Gómez" ] ,
-                           "password" : [ "password1" , "password2" , "password3" ]  ,
+                           "password" : [ "0001p" , "0002p" , "0003p" ]  ,
                            "card_state" : [ 1 , 1 , 0 ] ,
                            "total_balance" : [ 100000 , 100000 , 100000 ] ,
                            "day_balance" : [ 9100 , 9100 , 9100 ] ,
@@ -118,30 +119,58 @@ def validate_client_data( card_number ) :
         return "invalid_card", np.NaN, np.NaN
     
 
-def validate_password( client_data ) :
+def validate_password( client_data , index ) :
     """Esta función le pide la contraseña al usuario, si se equivoca después de 5 intentos, la tarjeta
         quedará bloqueada (card_status=0)"""
 
     # El usuario tiene 5 intentos para colocar correctamente su contraseña
     attemps = 5
 
+    # Se importa el csv con los clientes
+    ruta_csv = os.getcwd()
+    ruta_csv += "\clientsdata.csv"
+    database = pd.read_csv( ruta_csv )
+
     while True:
+        os.system( "cls" )
+
         # Pedimos al usuario que ingrese su contraseña
-        password = input( "Ingrese su contraseña o presione enter para salir:\n " )
+        password = str( input( "Ingrese su contraseña a 4 dígitos o presione enter para salir: " ) )
+
+        # Establecemos que deba ser únicamente 4 dígitos
+        patron = r"\d{4}"
+
+        # Matcheamos la contraseña ingresada y el patrón de los 4 dígitos
+        validate = re.fullmatch( patron , password )
+
+        # Si no concidieron, habrá que intentar de nuevo
+        if validate == None :
+            os.system( "cls" )
+            print( "Contraseña inválida. Intente de nuevo" )
+            attemps -= 1
+            time.sleep( 3 )
+            continue
 
         # Si el password es correcto salimos de esta función para pasar al menu d usuario
-        if password == client_data[ "password" ] :
+        if password == database.loc[ index , "password" ][0:4] :
             return "valid_pass"
 
         if len( password ) == 0 :
             return "exit_option"
 
         # Si la contraseña no es correcta, le informamos al usuario y le quitamos uno de los intentos
+        os.system( "cls" )
         print( "Contraseña incorrecta. Intente de nuevo." )
         attemps -= 1
 
         # si falla 5 veces, su tarjeta queda bloqeada
-        if attemps == 0 :
+        if attemps <= 0 :
+            database.loc[ index , "card_state" ] = 0
+            
+            # Se guarda nuevamente el csv con el estado de la tarjeta actualizado, el parámetro index se coloca porque, 
+            # en caso de no hacerlo, se escribe una columna nueva cada vez que se valide la contraseña
+            database.to_csv( ruta_csv , index = False )
+
             print( "Su tarjeta ha sido bloqueada. Ha colocado incorrectamente su contraseña 5 vcces." )
             print( "Consulte a su banco" )
 
@@ -163,16 +192,14 @@ def balance_inquiry( client_data , index ) :
     database = pd.read_csv( ruta_csv )
 
     # Se imprime el saldo disponible para ese día y el saldo total de la cuenta
-    print( "Saldo total = :" , database.loc[ index , "total_balance"  ] )
-    print( "Saldo disponible = :" , database.loc[ index , "day_balance" ] )
+    print( "Saldo total :" , database.loc[ index , "total_balance"  ] )
+    print( "Saldo disponible :" , database.loc[ index , "day_balance" ] )
 
     input( "Presione enter para coninuar" )
 
 
 def cash_withdrawal( client_data , index ) :
     """Esta función efectúa los retiros de la cuenta una vez validada"""
-
-    os.system( "cls" )
 
     # Se importa el csv con los clientes
     ruta_csv = os.getcwd()
@@ -181,13 +208,25 @@ def cash_withdrawal( client_data , index ) :
 
     # Se pide la cantidad a retirar y se verifica que sea menor o igual a la cantidad disponible ese día
     while True :
-        cash = int( input( "Ingrese la cantidad que desea retirar :\n" ) )
+        os.system( "cls" )
 
+        # Verificamos que lo ingresado sea un número y no un string
+        try:
+            cash = int( input( "Ingrese la cantidad que desea retirar :\n" ) )
+        except:
+            os.system( "cls" )
+            print( "Monto inválido. Intente de nuevo" )
+            time.sleep( 4 )
+            continue
+
+        # Si el monto a retirar es menor al saldo diario disponible, se continúa la transacción
         if cash <= database.loc[ index , "day_balance" ] :
             break
         else :
             os.system( "cls" )
             print( "Esa cantidad no está disponible en este momento. Intente de nuevo" )
+
+            time.sleep( 4 )
 
     # Se verifica que la cantidad a retirar esté disponible
     while True:
@@ -262,15 +301,14 @@ def return_day_balance( index ):
         database.to_csv( ruta_csv , index = False )
 
 
-
-
 def validate_option( option , client_data , index ) :
+        return_day_balance( index )
         if option == "1" :
             balance_inquiry( client_data , index )
         elif option == "2" :
             cash_withdrawal( client_data , index )
-        elif option == "3" :
-            wire_transfer( client_data , index )
+        #elif option == "3" :
+        #    wire_transfer( client_data , index )
         else:
             pass
         
