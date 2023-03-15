@@ -5,6 +5,30 @@ import pytz
 import time
 import numpy as np
 
+def date_modified( date ):
+    """Esta función le da un formato establecido a las fechas"""
+    return date.strftime( "%d-%m-%Y %H:%M:%S" )
+
+
+def only_date( date ):
+    """Esta función extrae únicamente la fecha de una variable de clase datetime o de una cadena con el
+    formato %d-%m-%Y %H:%M:$S """
+    if type( date ) == str :
+        date_format = dt.datetime.strptime( date , "%d-%m-%Y %H:%M:%S" )
+        return date_format.strftime( "%d-%m-%Y" )
+    else:
+        return date.strftime( "%d-%m-%Y" )
+    
+
+def only_time( date ) :
+    """Esta función extrae únicamente la hora de una variable de clase datetime o de una cadena con el
+    formato %d-%m-%Y %H:%M:$S"""
+
+    if type( date ) == str :
+        date_format = dt.datetime.strptime( date , "%d-%m-%Y %H:%M:%S" )
+        return date_format.strftime( "%H:%M:%S" )
+    else:
+        return date.strftime( "%H:%M:%S" )
 
 
 def validate_database() :
@@ -25,6 +49,7 @@ def validate_database() :
         # Se crea una variable con la fecha de hoy para agregarla al DataFrame
         today = dt.datetime.now()
         today = today.astimezone( zone )
+        today = date_modified( today )
 
         # Creamos los datos, el valor  en la columna card_state significa que la tarjeta está bloqueada
         client_columns = { "client_number" : [ "000001" , "000002" , "000003" ] ,
@@ -158,7 +183,7 @@ def cash_withdrawal( client_data , index ) :
     while True :
         cash = int( input( "Ingrese la cantidad que desea retirar :\n" ) )
 
-        if cash < database.loc[ index , "day_balance" ] :
+        if cash <= database.loc[ index , "day_balance" ] :
             break
         else :
             os.system( "cls" )
@@ -216,6 +241,27 @@ def wire_transfer( client_data , index ) :
         else :
             os.system( "cls" )
             print( "Esa cantidad no está disponible. Intente de nuevo" )
+
+
+def return_day_balance( index ):
+    
+    today = dt.datetime.today()
+    zone = pytz.timezone( 'America/Mexico_City' )
+    today = today.astimezone( zone )
+    date_today = only_date( today )
+
+    # Obtenemos la ruta de la carpeta en la que estamos trabajando y le añadimos el nombre y formato del csv
+    ruta_csv = os.getcwd()
+    ruta_csv += "\clientsdata.csv"
+    database = pd.read_csv( ruta_csv )
+    last_day = database.loc[ index , "last_consultation" ]
+    last_day = only_date( str( last_day ) )
+
+    if last_day != date_today :
+        database[ index , "day_balance" ] = 9100
+        database.to_csv( ruta_csv , index = False )
+
+
 
 
 def validate_option( option , client_data , index ) :

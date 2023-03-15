@@ -1,4 +1,4 @@
 Unnamed: 0,client_number,card_number,complete_name,password,card_state,total_balance,day_balance,last_consultation
-0,1,0000-0000-0000-0001,Juan Pérez Pérez,password1,1,98000,7100,2023-03-15 01:42:26.544829-06:00
-1,2,0000-0000-0000-0002,Leonardo Gabriel Díaz Feliciano,password2,1,100000,9100,2023-03-15 01:42:26.544829-06:00
-2,3,0000-0000-0000-0003,José Antonio García Gómez,password3,0,100000,9100,2023-03-15 01:42:26.544829-06:00
+0,1,0000-0000-0000-0001,Juan Pérez Pérez,password1,1,90900,0,15-03-2023 02:06:06
+1,2,0000-0000-0000-0002,Leonardo Gabriel Díaz Feliciano,password2,1,100000,9100,15-03-2023 02:06:06
+2,3,0000-0000-0000-0003,José Antonio García Gómez,password3,0,100000,9100,15-03-2023 02:06:06
